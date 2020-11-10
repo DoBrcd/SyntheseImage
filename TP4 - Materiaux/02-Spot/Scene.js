@@ -21,7 +21,9 @@ class Scene
         this.m_Light = new Light();
         this.m_Light.setColor(7.0, 7.0, 7.0);
         //this.m_Light.setPosition(-3.0, 3.0, 1.0, 0.0);      // directionnelle
-        this.m_Light.setPosition(-3.0, 3.0, 1.0, 1.0);    // positionnelle
+        this.m_Light.setPosition(-3.0,  3.0,  1.0, 1.0);    // positionnelle
+        this.m_Light.setDirection(1.5, -2.0, -0.5, 0.0);     // spot
+        this.m_Light.setAngles(30.0, 38.0);                         // spot
 
         // couleur du fond : gris très sombre
         gl.clearColor(0.2, 0.2, 0.2, 1.0);
@@ -77,7 +79,7 @@ class Scene
             break;
         default:
             // appeler la méthode de la superclasse
-            super.onKeyDown(code);
+            //super.onKeyDown(code);
         }
 
         // appliquer le décalage au centre de la rotation
@@ -140,7 +142,7 @@ class Scene
         /** gestion des lampes **/
 
         // animation de la lampe
-        this.m_Light.setPosition(-3.0*Math.cos(Utils.Time), 3.0, 1.0*Math.sin(Utils.Time), 1.0);
+        //this.m_Light.setPosition(-3.0*Math.cos(Utils.Time), 3.0, 1.0*Math.sin(Utils.Time), 1.0);
 
         // calculer la position et la direction de la lampe par rapport à la scène
         this.m_Light.transform(this.m_MatV);
