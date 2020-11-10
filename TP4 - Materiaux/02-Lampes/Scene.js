@@ -19,7 +19,7 @@ class Scene
 
         // caractéristiques de la lampe
         this.m_Light = new Light();
-        this.m_Light.setColor(1.0, 1.0, 1.0);
+        this.m_Light.setColor(7.0, 7.0, 7.0);
         //this.m_Light.setPosition(-3.0, 3.0, 1.0, 0.0);      // directionnelle
         this.m_Light.setPosition(-3.0,  3.0,  1.0, 1.0);    // positionnelle
 
