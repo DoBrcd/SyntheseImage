@@ -62,10 +62,11 @@ class MaterialColor extends Material
                 vec3 N = normalize(frgN);
 
                 // direction de la lumière dans le repère caméra
-                vec3 L = normalize(LightPosition.xyz - frgPosition.xyz * LightPosition.w);
+                vec3 L = LightPosition.xyz - frgPosition.xyz * LightPosition.w;
 
-                // distance de la lampe au fragment
-                float d2 = 1.0;
+                // carré de la distance de la lampe au fragment
+                float d2 = dot(L, L);
+                L = L / sqrt(d2);
 
                 // éclairement diffus de Lambert
                 float dotNL = clamp(dot(N, L), 0.0, 1.0);
