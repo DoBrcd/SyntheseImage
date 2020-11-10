@@ -36,7 +36,7 @@ class MaterialGreen extends Material
 
             // caractéristiques du matériau
             const vec4 Kd = vec4(0.0, 0.6, 0.0, 1.0);
-            const vec4 Ks = vec4(0.8, 0.8, 0.8, 1.0);
+            const vec4 Ks = vec4(1.0, 1.0, 1.0, 1.0);
             const float ns = 64.0;
 
             // lampes
