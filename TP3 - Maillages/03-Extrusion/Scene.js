@@ -55,7 +55,7 @@ class Scene
 
         // rotation pour orienter la scène
         mat4.rotateX(this.m_MatV, this.m_MatV, Utils.radians(20.0));
-        mat4.rotateY(this.m_MatV, this.m_MatV, Utils.radians(-30.0));
+        mat4.rotateY(this.m_MatV, this.m_MatV, Utils.radians(-30.0 * Utils.Time));
 
         // dessiner les triangles de la plaque légèrement en arrière
         gl.enable(gl.POLYGON_OFFSET_FILL);

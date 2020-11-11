@@ -416,6 +416,7 @@ class Vertex
         this.m_Mesh = mesh;
     }
 
+    // get the middle between A and B, store it in the map of A and B
     static middle(mesh, A, B) {
         let m = A.m_Milieux.get(B)
         if (m === undefined) {
