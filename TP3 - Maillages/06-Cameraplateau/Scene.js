@@ -63,7 +63,6 @@ class Scene
 
     onKeyDown(code)
     {
-        // TODO Compléter les actions clavier
         switch (code) {
             case 'Z':
                 this.m_Distance -= 0.25;
