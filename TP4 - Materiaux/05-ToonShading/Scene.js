@@ -1,10 +1,10 @@
 ﻿// Définition de la classe Scene
 
 // superclasses et classes nécessaires
-Requires("Plane");
+Requires("Grid");
+Requires("MaterialGreen");
+Requires("MaterialApple");
 Requires("Apple");
-Requires("Star");
-Requires("Light");
 
 
 class Scene
@@ -12,19 +12,24 @@ class Scene
     /** constructeur */
     constructor()
     {
+        // créer les matériaux
+        this.m_MatGreen = new MaterialGreen();
+        this.m_MatApple = new MaterialApple();
+
         // créer les objets à dessiner
-        this.m_Plane = new Plane(8);
-        this.m_Apple = new Apple();
-        this.m_Star = new Star(0.3, 4.0);
+        this.m_Grid = new Grid();
+        this.m_AppleGreen = new Apple(this.m_MatGreen);
+        this.m_AppleApple = new Apple(this.m_MatApple);
 
-        // caractéristiques de la lampe
-        this.m_Light = new Light();
-        this.m_Light.setColor(7.0, 7.0, 7.0);
-        //this.m_Light.setPosition(-3.0, 3.0, 1.0, 0.0);      // directionnelle
-        this.m_Light.setPosition(-3.0, 3.0, 1.0, 1.0);    // positionnelle
+        // position/direction des lampes en coordonnées scène
+        this.m_Lights = [
+            new Light().setPosition(-1.0,  0.7,  0.5,  0.0).setColor(1.0, 1.0, 1.0),
+            new Light().setPosition( 0.5,  1.0,  1.0,  0.0).setColor(0.5, 0.5, 0.5),
+            new Light().setPosition( 0.5,  0.5, -1.0,  0.0).setColor(0.6, 0.6, 0.6)
+        ];
 
-        // couleur du fond : gris très sombre
-        gl.clearColor(0.2, 0.2, 0.2, 1.0);
+        // couleur du fond : gris très clair
+        gl.clearColor(0.9, 0.9, 0.9, 1.0);
 
         // activer le depth buffer
         gl.enable(gl.DEPTH_TEST);
@@ -32,8 +37,8 @@ class Scene
         // gestion souris
         this.m_Azimut    = -30.0;
         this.m_Elevation = 20.0;
-        this.m_Distance  = 20.0;
-        this.m_Center    = vec3.fromValues(0, -0.8, 0);
+        this.m_Distance  = 12.0;
+        this.m_Center    = vec3.fromValues(0, -1.0, 0);
         this.m_Clicked   = false;
 
         // matrices
@@ -121,7 +126,8 @@ class Scene
 
     onDrawFrame()
     {
-        /** préparation des matrices **/
+        // effacer l'écran
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
         // positionner la caméra
         mat4.identity(this.m_MatV);
@@ -136,46 +142,39 @@ class Scene
         // centre des rotations
         mat4.translate(this.m_MatV, this.m_MatV, this.m_Center);
 
-
-        /** gestion des lampes **/
-
-        // animation de la lampe
-        this.m_Light.setPosition(-3.0*Math.cos(Utils.Time), 3.0, 1.0*Math.sin(Utils.Time), 1.0);
-
-        // calculer la position et la direction de la lampe par rapport à la scène
-        this.m_Light.transform(this.m_MatV);
-
-        // fournir position et direction en coordonnées caméra aux objets qui les enverront à leurs matériaux
-        this.m_Plane.setLight(this.m_Light);
-        this.m_Apple.setLight(this.m_Light);
-
-
-        /** dessin de l'image **/
-
-        // effacer l'écran
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-
-        // dessiner une étoile là où est la lampe si elle est positionnelle
-        if (this.m_Light.m_LightPositionScene[3] == 1.0) {
-            mat4.translate(this.m_MatVM, this.m_MatV, this.m_Light.m_LightPositionScene);
-            this.m_Star.onDraw(this.m_MatP, this.m_MatVM);
+        // calculer la position des lampes par rapport à la caméra
+        for (let light of this.m_Lights) {
+            light.transform(this.m_MatV);
         }
 
-        // dessiner le plan
-        this.m_Plane.onDraw(this.m_MatP, this.m_MatV);
+        // fournir les lampes aux matériaux
+        this.m_MatGreen.setLights(this.m_Lights);
+        this.m_MatApple.setLights(this.m_Lights);
 
-        // dessiner la pomme en réduisant sa taille
-        mat4.translate(this.m_MatV, this.m_MatV, vec3.fromValues(1.0, 0.0, 0.0));
-        mat4.scale(this.m_MatVM, this.m_MatV, vec3.fromValues(0.03, 0.03, 0.03));
-        this.m_Apple.onDraw(this.m_MatP, this.m_MatVM);
+        // dessiner la grille
+        this.m_Grid.onDraw(this.m_MatP, this.m_MatV);
+
+        // dessiner la pomme verte en réduisant sa taille
+        mat4.translate(this.m_MatVM, this.m_MatV, vec3.fromValues(1.2, 0.0, 0.0));
+        mat4.rotateY(this.m_MatVM, this.m_MatVM, Utils.radians(15.0*Utils.Time));
+        mat4.scale(this.m_MatVM, this.m_MatVM, vec3.fromValues(0.03, 0.03, 0.03));
+        this.m_AppleGreen.onDraw(this.m_MatP, this.m_MatVM);
+
+        // dessiner la pomme normale en réduisant sa taille
+        mat4.translate(this.m_MatVM, this.m_MatV, vec3.fromValues(-1.2, 0.0, 0.0));
+        mat4.rotateY(this.m_MatVM, this.m_MatVM, Utils.radians(-25.0*Utils.Time));
+        mat4.scale(this.m_MatVM, this.m_MatVM, vec3.fromValues(0.03, 0.03, 0.03));
+        this.m_AppleApple.onDraw(this.m_MatP, this.m_MatVM);
     }
 
 
     /** supprime tous les objets de cette scène */
     destroy()
     {
-        this.m_Plane.destroy();
-        this.m_Apple.destroy();
-        this.m_Star.destroy();
+        this.m_Grid.destroy();
+        this.m_AppleGreen.destroy();
+        this.m_AppleApple.destroy();
+        this.m_MatGreen.destroy();
+        this.m_MatApple.destroy();
     }
 }

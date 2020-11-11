@@ -1,10 +1,9 @@
-﻿// Définition de la classe MaterialApple
+﻿// Définition de la classe MaterialGreen
 
 Requires("Material");
-Requires("Texture2D");
 
 
-class MaterialApple extends Material
+class MaterialGreen extends Material
 {
     constructor()
     {
@@ -19,19 +18,16 @@ class MaterialApple extends Material
             // VBO fournissant les infos des sommets
             in vec3 glVertex;
             in vec3 glNormal;
-            in vec2 glTexCoords;
 
             // données pour le fragment shader
             out vec4 frgPosition;
             out vec3 frgN;
-            out vec2 frgTexCoords;
 
             void main()
             {
                 frgPosition = matVM * vec4(glVertex, 1.0);
                 gl_Position = matP * frgPosition;
                 frgN = matN * glNormal;
-                frgTexCoords = glTexCoords;
             }`;
 
         let srcFragmentShader = dedent
@@ -39,9 +35,9 @@ class MaterialApple extends Material
             precision mediump float;
 
             // caractéristiques du matériau
-            uniform sampler2D texDiffuse;
-            const vec3 Ks = vec3(1.0, 1.0, 1.0);
-            const float ns = 128.0;
+            const vec4 Kd = vec4(0.0, 0.6, 0.0, 1.0);
+            const vec4 Ks = vec4(1.0, 1.0, 1.0, 1.0);
+            const float ns = 64.0;
 
             // lampes
             const int nbL = 3;
@@ -51,32 +47,49 @@ class MaterialApple extends Material
             // données venant du vertex shader
             in vec4 frgPosition;
             in vec3 frgN;
-            in vec2 frgTexCoords;
 
             // sortie du shader
             out vec4 glFragColor;
 
             void main()
             {
-                // couleur diffuse du matériau en ce point
-                vec3 Kd = texture(texDiffuse, frgTexCoords).rgb;
-
                 // éclairement ambiant : 20%
-                glFragColor = vec4(Kd * 0.2, 1.0);
+                glFragColor = Kd * 0.2;
+
+                //calculer N
+                vec3 N = normalize(frgN);
+                
+                // calculer V
+                vec3 mV = normalize(frgPosition.xyz);
+
+                //Calculer Rv
+                vec3 Rv = reflect(mV, N);
+                //glFragColor = vec4(Rv, 1.0); return ;
 
                 /// TODO calculer Lambert + Phong avec chaque lampe
+                for (int i=0; i<nbL; i++) {
+
+                    // Calculer L
+                    vec3 L = normalize(LightPositions[i].xyz - frgPosition.xyz * LightPositions[i].w);
+
+                    // eclairement diffus
+                    float D = clamp(dot(N, L), 0.0, 1.0);
+
+                    glFragColor += D * Kd * vec4(LightColors[i], 0.0);
+
+                    // eclairement spec
+                    float S = pow(clamp(dot(Rv, L), 0.0, 1.0), ns);
+
+                    glFragColor += S * Ks * vec4(LightColors[i], 0.0);
+                }
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
-        super(srcVertexShader, srcFragmentShader, "MaterialApple");
+        super(srcVertexShader, srcFragmentShader, "MaterialGreen");
 
         // emplacement des variables uniform spécifiques
-        this.m_TexDiffuseLoc = gl.getUniformLocation(this.m_ShaderId, "texDiffuse");
         this.m_LightColorsLoc = gl.getUniformLocation(this.m_ShaderId, "LightColors");
         this.m_LightPositionsLoc = gl.getUniformLocation(this.m_ShaderId, "LightPositions");
-
-        // charge l'image de la pomme en tant que texture
-        this.m_Texture = new Texture2D("data/Apple/skin.jpg");
     }
 
 
@@ -109,35 +122,5 @@ class MaterialApple extends Material
         }
         gl.uniform3fv(this.m_LightColorsLoc, colors);
         gl.uniform4fv(this.m_LightPositionsLoc, positions);
-    }
-
-
-    select(mesh, matP, matVM)
-    {
-        // méthode de la superclasse (active le shader)
-        super.select(mesh, matP, matVM);
-
-        // activer la texture sur l'unité 0
-        this.m_Texture.setTextureUnit(gl.TEXTURE0, this.m_TexDiffuseLoc);
-    }
-
-
-    deselect()
-    {
-        // libérer le sampler
-        this.m_Texture.setTextureUnit(gl.TEXTURE0);
-
-        // méthode de la superclasse (désactive le shader)
-        super.deselect();
-    }
-
-
-    destroy()
-    {
-        // méthode de la superclasse
-        super.destroy();
-
-        // supprimer la texture
-        this.m_Texture.destroy();
     }
 }

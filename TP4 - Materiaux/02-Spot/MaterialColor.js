@@ -68,9 +68,13 @@ class MaterialColor extends Material
                 float d2 = dot(L, L);
                 L = L / sqrt(d2);
 
+
+                // visibilité ?
+                float visib = smoothstep(cosmaxangle, cosminangle, dot(-L, LightDirection.xyz));
+
                 // éclairement diffus de Lambert
                 float dotNL = clamp(dot(N, L), 0.0, 1.0);
-                vec3 dif = LightColor/d2 * Kd * dotNL;
+                vec3 dif = visib * LightColor/d2 * Kd * dotNL;
 
                 // couleur finale = diffus + ambiant
                 glFragColor = vec4(dif + amb, 1.0);
@@ -82,11 +86,14 @@ class MaterialColor extends Material
         // emplacement des variables uniform spécifiques
         this.m_LightColorLoc     = gl.getUniformLocation(this.m_ShaderId, "LightColor");
         this.m_LightPositionLoc  = gl.getUniformLocation(this.m_ShaderId, "LightPosition");
+        this.m_LightDirectionLoc  = gl.getUniformLocation(this.m_ShaderId, "LightDirection");
+        this.m_CosMaxAngleLoc  = gl.getUniformLocation(this.m_ShaderId, "cosmaxangle");
+        this.m_CosMinAngleLoc  = gl.getUniformLocation(this.m_ShaderId, "cosminangle");
     }
 
 
     /**
-     * définit la lampe
+     * Fournit la lampe au shader
      * @param light : instance de Light spécifiant les caractéristiques de la lampe
      */
     setLight(light)
@@ -97,5 +104,8 @@ class MaterialColor extends Material
         // fournir les infos de la lampe au shader
         vec3.glUniform(this.m_LightColorLoc,     light.getColor());
         vec4.glUniform(this.m_LightPositionLoc,  light.getPosition());
+        vec4.glUniform(this.m_LightDirectionLoc, light.getDirection());
+        gl.uniform1f(this.m_CosMaxAngleLoc, light.getCosMaxAngle());
+        gl.uniform1f(this.m_CosMinAngleLoc, light.getCosMinAngle());
     }
 }

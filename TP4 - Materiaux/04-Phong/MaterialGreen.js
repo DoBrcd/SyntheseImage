@@ -35,8 +35,8 @@ class MaterialGreen extends Material
             precision mediump float;
 
             // caractéristiques du matériau
-            const vec3 Kd = vec3(0.0, 0.6, 0.0);
-            const vec3 Ks = vec3(0.8, 0.8, 0.8);
+            const vec4 Kd = vec4(0.0, 0.6, 0.0, 1.0);
+            const vec4 Ks = vec4(1.0, 1.0, 1.0, 1.0);
             const float ns = 64.0;
 
             // lampes
@@ -54,9 +54,34 @@ class MaterialGreen extends Material
             void main()
             {
                 // éclairement ambiant : 20%
-                glFragColor = vec4(Kd * 0.2, 1.0);
+                glFragColor = Kd * 0.2;
+
+                //calculer N
+                vec3 N = normalize(frgN);
+                
+                // calculer V
+                vec3 mV = normalize(frgPosition.xyz);
+
+                //Calculer Rv
+                vec3 Rv = reflect(mV, N);
+                //glFragColor = vec4(Rv, 1.0); return ;
 
                 /// TODO calculer Lambert + Phong avec chaque lampe
+                for (int i=0; i<nbL; i++) {
+
+                    // Calculer L
+                    vec3 L = normalize(LightPositions[i].xyz - frgPosition.xyz * LightPositions[i].w);
+
+                    // eclairement diffus
+                    float D = clamp(dot(N, L), 0.0, 1.0);
+
+                    glFragColor += D * Kd * vec4(LightColors[i], 0.0);
+
+                    // eclairement spec
+                    float S = pow(clamp(dot(Rv, L), 0.0, 1.0), ns);
+
+                    glFragColor += S * Ks * vec4(LightColors[i], 0.0);
+                }
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
