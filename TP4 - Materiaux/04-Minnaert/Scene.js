@@ -3,6 +3,7 @@
 // superclasses et classes nécessaires
 Requires("Grid");
 Requires("MaterialGreen");
+Requires("MaterialRed");
 Requires("MaterialApple");
 Requires("Apple");
 
@@ -15,11 +16,13 @@ class Scene
         // créer les matériaux
         this.m_MatGreen = new MaterialGreen();
         this.m_MatApple = new MaterialApple();
+        this.m_MatRed = new MaterialRed();
 
         // créer les objets à dessiner
         this.m_Grid = new Grid();
         this.m_AppleGreen = new Apple(this.m_MatGreen);
         this.m_AppleApple = new Apple(this.m_MatApple);
+        this.m_AppleRed = new Apple(this.m_MatRed);
 
         // position/direction des lampes en coordonnées scène
         this.m_Lights = [
@@ -150,6 +153,7 @@ class Scene
         // fournir les lampes aux matériaux
         this.m_MatGreen.setLights(this.m_Lights);
         this.m_MatApple.setLights(this.m_Lights);
+        this.m_MatRed.setLights(this.m_Lights);
 
         // dessiner la grille
         this.m_Grid.onDraw(this.m_MatP, this.m_MatV);
@@ -165,6 +169,12 @@ class Scene
         mat4.rotateY(this.m_MatVM, this.m_MatVM, Utils.radians(-25.0*Utils.Time));
         mat4.scale(this.m_MatVM, this.m_MatVM, vec3.fromValues(0.03, 0.03, 0.03));
         this.m_AppleApple.onDraw(this.m_MatP, this.m_MatVM);
+
+        // dessiner la pomme rouge en réduisant sa taille
+        mat4.translate(this.m_MatVM, this.m_MatV, vec3.fromValues(0, 0.0, -2));
+        mat4.rotateY(this.m_MatVM, this.m_MatVM, Utils.radians(-15.0*Utils.Time));
+        mat4.scale(this.m_MatVM, this.m_MatVM, vec3.fromValues(0.03, 0.03, 0.03));
+        this.m_AppleRed.onDraw(this.m_MatP, this.m_MatVM);
     }
 
 

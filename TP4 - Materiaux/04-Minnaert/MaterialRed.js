@@ -1,11 +1,14 @@
-﻿// Définition de la classe MaterialGreen
+﻿// Définition de la classe MaterialRed
 
 Requires("Material");
 
 
-class MaterialGreen extends Material {
-    constructor() {
-        let srcVertexShader = dedent `#version 300 es
+class MaterialRed extends Material
+{
+    constructor()
+    {
+        let srcVertexShader = dedent
+            `#version 300 es
 
             // matrices de transformation
             uniform mat4 matP;
@@ -27,11 +30,12 @@ class MaterialGreen extends Material {
                 frgN = matN * glNormal;
             }`;
 
-        let srcFragmentShader = dedent `#version 300 es
+        let srcFragmentShader = dedent
+            `#version 300 es
             precision mediump float;
 
             // caractéristiques du matériau
-            const vec4 Kd = vec4(0.0, 0.6, 0.0, 1.0);
+            const vec4 Kd = vec4(0.6, 0.1, 0.2, 1.0);
             const vec4 Ks = vec4(1.0, 1.0, 1.0, 1.0);
             const float ns = 64.0;
 
@@ -62,34 +66,19 @@ class MaterialGreen extends Material {
                 vec3 Rv = reflect(mV, N);
                 //glFragColor = vec4(Rv, 1.0); return ;
 
-                const float sigma2 = 0.1;
-                const float a = 1.0 - 0.5 * sigma2 / (sigma2 + 0.57);
-                const float b = 0.45 * sigma2 / (sigma2 + 0.09);
-
                 for (int i=0; i<nbL; i++) {
+
                     // Calculer L
                     vec3 L = normalize(LightPositions[i].xyz - frgPosition.xyz * LightPositions[i].w);
 
-                    // eclairement diffus (ORENNAYAR)
-                                        
-                    float dotNL = dot(N,L);
-                    float angleNL = acos(dotNL);
-                    float dotNV = dot(N,-mV);
-                    float angleNV = acos(dotNV);
-
-                    vec3 Ltb = normalize(L - N*dotNL);
-                    vec3 Vtb = normalize(-mV - N*dotNV);
-
-                    float alpha = max(angleNV, angleNL);
-                    float beta = min(angleNV, angleNL);
-                    float c = sin(alpha) * tan(beta);
-                    float gamma = max(0.0, dot(Vtb, Ltb));
-                                        
-                    float D = clamp(dotNL, 0.0, 1.0) * (a + b * gamma * c);
+                    // eclairement diffus / Utilisation de Minnaert
+                    float dotNV = clamp(dot(N, -mV), 0.0, 1.0);
+                    float dotNL = clamp(dot(N, L), 0.0, 1.0);
+                    float D = pow(dotNL * dotNV, 0.75);
 
                     glFragColor += D * Kd * vec4(LightColors[i], 0.0);
 
-                    // eclairement spec
+                    // eclairement spec / Utilisation de Phong
                     float S = pow(clamp(dot(Rv, L), 0.0, 1.0), ns);
 
                     glFragColor += S * Ks * vec4(LightColors[i], 0.0);
@@ -97,7 +86,7 @@ class MaterialGreen extends Material {
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
-        super(srcVertexShader, srcFragmentShader, "MaterialGreen");
+        super(srcVertexShader, srcFragmentShader, "MaterialRed");
 
         // emplacement des variables uniform spécifiques
         this.m_LightColorsLoc = gl.getUniformLocation(this.m_ShaderId, "LightColors");
@@ -109,7 +98,8 @@ class MaterialGreen extends Material {
      * définit l'ensemble des lampes
      * @param lights : tableau de Light donnant la position des lampes par rapport à la caméra
      */
-    setLights(lights) {
+    setLights(lights)
+    {
         // TODO recompiler le shader si le nombre de lampes a changé
         let nblights = lights.length;
         if (nblights != 3) throw "bad lights number";
@@ -118,18 +108,18 @@ class MaterialGreen extends Material {
         gl.useProgram(this.m_ShaderId);
 
         // construire un tableau regroupant les couleurs et un autre avec les positions
-        let colors = new Float32Array(3 * nblights);
-        let positions = new Float32Array(4 * nblights);
-        for (let i = 0; i < nblights; i++) {
+        let colors = new Float32Array(3*nblights);
+        let positions = new Float32Array(4*nblights);
+        for (let i=0; i<nblights; i++) {
             let color = lights[i].getColor();
-            colors[i * 3 + 0] = color[0];
-            colors[i * 3 + 1] = color[1];
-            colors[i * 3 + 2] = color[2];
+            colors[i*3+0] = color[0];
+            colors[i*3+1] = color[1];
+            colors[i*3+2] = color[2];
             let position = lights[i].getPosition();
-            positions[i * 4 + 0] = position[0];
-            positions[i * 4 + 1] = position[1];
-            positions[i * 4 + 2] = position[2];
-            positions[i * 4 + 3] = position[3];
+            positions[i*4+0] = position[0];
+            positions[i*4+1] = position[1];
+            positions[i*4+2] = position[2];
+            positions[i*4+3] = position[3];
         }
         gl.uniform3fv(this.m_LightColorsLoc, colors);
         gl.uniform4fv(this.m_LightPositionsLoc, positions);
