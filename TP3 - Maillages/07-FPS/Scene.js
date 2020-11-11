@@ -16,6 +16,9 @@ class Scene
         this.m_Pyramide = new Pyramide();
         this.m_Cow = new Cow();
 
+        this.m_Fly = false; // Désactive la possibilité de voler
+        this.m_Crouch = false; //S'accroupir ou pas 
+
         // couleur du fond : gris très clair
         gl.clearColor(0.9, 0.9, 0.9, 1.0);
 
@@ -30,14 +33,13 @@ class Scene
         this.m_Azimut = 0.0;
         this.m_Elevation = 0.0;
         this.m_Distance = 15.0; //will disappear
-        this.m_InvPosCam = vec3.fromValues(0, -1.8, 0);
+        this.m_InvPosCam = vec3.fromValues(0, -2, 0);
         this.m_Clicked = false;
 
         // matrices
         this.m_MatP = mat4.create();
         this.m_MatV = mat4.create();
         this.m_MatVM = mat4.create();
-        this.m_MatR = mat4.create();
     }
 
 
@@ -65,14 +67,41 @@ class Scene
 
     onKeyDown(code)
     {
-        // TODO Compléter les actions clavier
+        let mvt = vec3.create();
+        let MatR = mat4.create();
+        const pas = 0.3;
         switch (code) {
             case 'Z':
+                // move forward
+                mvt = vec3.fromValues(0, 0, pas);
                 break;
             case 'S':
+                // Move backward
+                mvt = vec3.fromValues(0, 0, -pas);
+                break;
+            case 'Q':
+                // Move Left
+                mvt = vec3.fromValues(pas, 0, 0);
+                break;
+            case 'D':
+                // Move Right
+                mvt = vec3.fromValues(-pas, 0, 0);
+                break;
+            case 'C':
+                this.m_Crouch = !this.m_Crouch;
                 break;
         }
-
+        mat4.rotateY(MatR, MatR, Utils.radians(-this.m_Azimut));
+        mat4.rotateX(MatR, MatR, Utils.radians(-this.m_Elevation));
+        vec3.transformMat4(mvt, mvt, MatR);
+        vec3.add(this.m_InvPosCam, this.m_InvPosCam, mvt);
+        if (!this.m_Fly) {
+            if (this.m_Crouch) {
+                this.m_InvPosCam[1] = -1;
+            } else {
+                this.m_InvPosCam[1] = -2;
+            }
+        }
         // Todo Affecter this.m_MatR puis m_InvPosCam (cf cours)
     }
 
