@@ -1,9 +1,9 @@
-﻿// Définition de la classe MaterialGreen
+﻿// Définition de la classe MaterialRed
 
 Requires("Material");
 
 
-class MaterialGreen extends Material
+class MaterialRed extends Material
 {
     constructor()
     {
@@ -35,7 +35,7 @@ class MaterialGreen extends Material
             precision mediump float;
 
             // caractéristiques du matériau
-            const vec4 Kd = vec4(0.0, 0.6, 0.0, 1.0);
+            const vec4 Kd = vec4(0.6, 0.1, 0.2, 1.0);
             const vec4 Ks = vec4(1.0, 1.0, 1.0, 1.0);
             const float ns = 64.0;
 
@@ -66,18 +66,19 @@ class MaterialGreen extends Material
                 vec3 Rv = reflect(mV, N);
                 //glFragColor = vec4(Rv, 1.0); return ;
 
-                /// TODO calculer Lambert + Phong avec chaque lampe
                 for (int i=0; i<nbL; i++) {
 
                     // Calculer L
                     vec3 L = normalize(LightPositions[i].xyz - frgPosition.xyz * LightPositions[i].w);
 
-                    // eclairement diffus
-                    float D = clamp(dot(N, L), 0.0, 1.0);
+                    // eclairement diffus / Utilisation de Minnaert
+                    float dotNV = clamp(dot(N, -mV), 0.0, 1.0);
+                    float dotNL = clamp(dot(N, L), 0.0, 1.0);
+                    float D = pow(dotNL * dotNV, 0.75);
 
                     glFragColor += D * Kd * vec4(LightColors[i], 0.0);
 
-                    // eclairement spec
+                    // eclairement spec / Utilisation de Phong
                     float S = pow(clamp(dot(Rv, L), 0.0, 1.0), ns);
 
                     glFragColor += S * Ks * vec4(LightColors[i], 0.0);
@@ -85,7 +86,7 @@ class MaterialGreen extends Material
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
-        super(srcVertexShader, srcFragmentShader, "MaterialGreen");
+        super(srcVertexShader, srcFragmentShader, "MaterialRed");
 
         // emplacement des variables uniform spécifiques
         this.m_LightColorsLoc = gl.getUniformLocation(this.m_ShaderId, "LightColors");
