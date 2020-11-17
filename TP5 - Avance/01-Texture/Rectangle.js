@@ -18,10 +18,10 @@ class Rectangle extends Mesh
         this.m_MatRectangle = matrectangle;
 
         // ajout des sommets
-        let P1 = new Vertex(this, -1.0,  0.0,  0.0).setTexCoords(0.0, 0.0);
-        let P2 = new Vertex(this, +1.0,  0.0,  0.0).setTexCoords(1.0, 0.0);
-        let P3 = new Vertex(this, +1.0, +1.0,  0.0).setTexCoords(1.0, 1.0);
-        let P4 = new Vertex(this, -1.0, +1.0,  0.0).setTexCoords(0.0, 1.0);
+        let P1 = new Vertex(this, -1.0,  0.0, 0.0).setTexCoords(0.45, 0.80);
+        let P2 = new Vertex(this, +1.0,  0.0, 0.0).setTexCoords(0.55, 0.80);
+        let P3 = new Vertex(this, +1.0, +1.0, 0.0).setTexCoords(0.55, 0.70);
+        let P4 = new Vertex(this, -1.0, +1.0, 0.0).setTexCoords(0.45, 0.70);
 
         // ajout des triangles
         this.addQuad(P1, P2, P3, P4);
