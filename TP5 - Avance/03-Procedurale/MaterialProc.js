@@ -67,11 +67,19 @@ class MaterialProc extends Material
             void main()
             {
                 // distance au centre de l'espace des textures
-                float dr = (1.0 - 15.0*distance(frgTexCoords, vec2(0.5 + 0.25*pow(sin(time),3.0), 0.5 + 0.25 * (cos(time) - pow(cos(time),4.0)))))*1.0;
-                float dg = (1.0 - 15.0*distance(frgTexCoords, vec2(0.5 + -0.25*pow(sin(time),3.0), 0.5 + 0.25 * (cos(time) - pow(cos(time),4.0)))))*1.0;
+                /*float dr = (1.0 - 15.0*distance(frgTexCoords, vec2(0.5 + 0.25*pow(sin(frgTexCoords.s),3.0), 0.5 + 0.25 * (cos(frgTexCoords.t) - pow(cos(frgTexCoords.t),4.0)))))*1.0;
+                float dg = (1.0 - 15.0*distance(frgTexCoords, vec2(0.5 + -0.25*pow(sin(frgTexCoords.s),3.0), 0.5 + 0.25 * (cos(frgTexCoords.t) - pow(cos(frgTexCoords.t),4.0)))))*1.0;
                 float db = (1.0 - 2.0*distance(frgTexCoords, vec2(0.75 + 0.1 * cos(time), 0.25 + 0.5 * sin(time))) )* 0.0;
+*/
+                float angle = atan(0.5 - frgTexCoords.t, 0.5 - frgTexCoords.s);
+                float d = distance(frgTexCoords, vec2(0.5));
+                float r = 0.5+0.7* angle *sin(8.0*6.28*frgTexCoords.s);
+                float g = 0.5+0.2* angle *sin(8.0*6.28*frgTexCoords.t );
+                float b = (1.0-r)*(1.0-g);
 
-                glFragColor = vec4(dr, dg, db, 1.0);
+                glFragColor = vec4(r,g,b, 1.0);
+
+                //glFragColor = vec4(dr, dg, db, 1.0);
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
