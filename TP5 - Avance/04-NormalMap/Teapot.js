@@ -27,7 +27,7 @@ class Teapot extends Mesh
     onMeshLoaded()
     {
         // attention, c'est TRÈS lent, car le maillage ne gère pas les voisinages
-        //this.computeNormals();      // pour avoir des normales conformes aux tangentes (même type de calcul)
+        this.computeNormals();      // pour avoir des normales conformes aux tangentes (même type de calcul)
         this.computeTangents();
     }
 

@@ -69,15 +69,41 @@ class MaterialTeapot extends Material
                 // couleur diffuse
                 vec3 Kd = texture(texDiffuse, frgTexCoords).rgb;
 
-                /// TODO construire le repère TBN
+                /// construire le repère TBN
                 vec3 N = normalize(frgN);
+                vec3 T = normalize(frgT);
+                vec3 B = cross(N, T);
 
-                /// TODO aller chercher la normale dans la "normal map" texNormale
+                /// aller chercher la normale dans la "normal map" texNormale
+                vec3 Nmod = texture(texNormale, frgTexCoords).xyz;
+                Nmod = Nmod * 2.0 - 1.0;
+                /// la mettre dans le repère global et la normaliser
+                mat3 TBN = mat3(T, B, N);
+                Nmod = normalize(TBN * Nmod);
+                /// éclairement de Lambert et Phong ou autre
 
-                /// TODO la mettre dans le repère global et la normaliser
+                vec3 mV = normalize(frgPosition.xyz);
 
-                /// TODO éclairement de Lambert et Phong ou autre
-                glFragColor = vec4(Kd, 1.0);
+                for (int i=0; i<nbL; i++) {
+
+                    // Calculer L
+                    vec3 L = normalize(LightPositions[i].xyz - frgPosition.xyz * LightPositions[i].w);
+
+                    // eclairement diffus / Utilisation de Lambert
+                    float D = clamp(dot(Nmod, L), 0.0, 1.0);
+
+                    glFragColor += D * vec4(Kd,0.0) * vec4(LightColors[i], 0.0);
+
+                    // eclairement spec / Utilisation de Blinn
+                    vec3 H = normalize(L - mV);
+                    float dotNH = clamp(dot(Nmod, H), 0.0, 1.0);
+                    float S = pow(dotNH, ns);
+
+                    glFragColor += S * vec4(Ks,0.0) * vec4(LightColors[i], 0.0);
+                }
+
+
+                //glFragColor = vec4(Kd, 1.0);
             }`;
 
         // compile le shader, recherche les emplacements des uniform et attribute communs
