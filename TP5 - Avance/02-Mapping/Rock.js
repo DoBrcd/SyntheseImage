@@ -5,13 +5,11 @@ Requires("Mesh");
 Requires("MaterialRock");
 
 
-class Rock extends Mesh
-{
+class Rock extends Mesh {
     /** constructeur */
-    constructor()
-    {
+    constructor() {
         // créer le matériau (this n'est pas encore défini)
-        let matrock  = new MaterialRock();
+        let matrock = new MaterialRock();
 
         // initialisation de this
         super("Rock", matrock);
@@ -23,8 +21,7 @@ class Rock extends Mesh
 
 
     /** appelée quand le maillage est chargé */
-    onRockLoaded()
-    {
+    onRockLoaded() {
         // déterminer la boîte englobante du maillage
         // TODO ce serait à déplacer dans la classe Mesh
         let min = vec3.clone(this.m_VertexList[0].m_Coords);
@@ -42,10 +39,15 @@ class Rock extends Mesh
         // calcul des coordonnées de texture selon le volume
         let coords = vec3.create();
         for (let v of this.m_VertexList) {
-
+            coords = vec3.subtract(coords, v.m_Coords, centre)
+            //vec3.add(coords, v.m_Coords, centre);
             /// faire un calcul correct (en fait, c'est un mapping plan)
-            let s = (v.m_Coords[0] - min[0])/(max[0] - min[0]);
-            let t = (v.m_Coords[1] - min[1])/(max[1] - min[1]);
+            //let s = (v.m_Coords[0] - min[0]) / (max[0] - min[0]);
+            //let t = (v.m_Coords[1] - min[1]) / (max[1] - min[1]);
+
+
+            let s = Math.atan2(coords[2], coords[0])/(2*Math.PI);
+            let t = (Math.asin(coords[1]/vec3.normalize(coords[0], coords[1], coords[2]) )/Math.PI) + 0.5
 
 
             // définition des coordonnées de texture
@@ -57,8 +59,7 @@ class Rock extends Mesh
     /**
      * supprime toutes les ressources allouées dans le constructeur
      */
-    destroy()
-    {
+    destroy() {
         // méthode de la superclasse (suppression des VBOs)
         super.destroy();
 
