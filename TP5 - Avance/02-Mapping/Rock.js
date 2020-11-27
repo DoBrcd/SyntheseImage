@@ -43,9 +43,10 @@ class Rock extends Mesh
         let coords = vec3.create();
         for (let v of this.m_VertexList) {
 
-            /// TODO faire un calcul correct et pas n'importe quoi comme ceci (en fait, c'est un mapping plan)
-            let s = (v.m_Coords[0] - min[0]) * 0.25;
-            let t = (max[1] - v.m_Coords[1]) * 0.75;
+            /// faire un calcul correct (en fait, c'est un mapping plan)
+            let s = (v.m_Coords[0] - min[0])/(max[0] - min[0]);
+            let t = (v.m_Coords[1] - min[1])/(max[1] - min[1]);
+
 
             // définition des coordonnées de texture
             v.setTexCoords(s, t);

@@ -1,4 +1,4 @@
-﻿// Définition de la classe Rock
+// Définition de la classe Rock
 
 // superclasse et classes nécessaires
 Requires("Mesh");
@@ -25,7 +25,32 @@ class Rock extends Mesh
     /** appelée quand le maillage est chargé */
     onRockLoaded()
     {
-        // recopier la méthode du projet 02-Mapping
+        // déterminer la boîte englobante du maillage
+        // TODO ce serait à déplacer dans la classe Mesh
+        let min = vec3.clone(this.m_VertexList[0].m_Coords);
+        let max = vec3.clone(this.m_VertexList[0].m_Coords);
+        for (let v of this.m_VertexList) {
+            vec3.min(min, min, v.m_Coords);
+            vec3.max(max, max, v.m_Coords);
+        }
+
+        // centre du volume englobant
+        let centre = vec3.create();
+        vec3.add(centre, min, max);
+        vec3.scale(centre, centre, 0.5);
+
+        // calcul des coordonnées de texture selon le volume
+        let coords = vec3.create();
+        for (let v of this.m_VertexList) {
+
+            /// faire un calcul correct (en fait, c'est un mapping plan)
+            let s = (v.m_Coords[0] - min[0])/(max[0] - min[0]);
+            let t = (v.m_Coords[1] - min[1])/(max[1] - min[1]);
+
+
+            // définition des coordonnées de texture
+            v.setTexCoords(s, t);
+        }
     }
 
 
