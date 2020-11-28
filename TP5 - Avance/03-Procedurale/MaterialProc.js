@@ -73,8 +73,8 @@ class MaterialProc extends Material
 */
                 float angle = atan(0.5 - frgTexCoords.t, 0.5 - frgTexCoords.s);
                 float d = distance(frgTexCoords, vec2(0.5));
-                float r = 0.5+0.7* angle *sin(8.0*6.28*frgTexCoords.s);
-                float g = 0.5+0.2* angle *sin(8.0*6.28*frgTexCoords.t );
+                float r = 0.5+ 0.7 * angle * sin(8.0*6.28*frgTexCoords.s * d);
+                float g = -0.5+ 0.2 * angle * sin(8.0*6.28*frgTexCoords.t * d);
                 float b = (1.0-r)*(1.0-g);
 
                 glFragColor = vec4(r,g,b, 1.0);

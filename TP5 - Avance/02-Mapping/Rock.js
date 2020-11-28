@@ -39,6 +39,20 @@ class Rock extends Mesh {
         // calcul des coordonnées de texture selon le volume
         let coords = vec3.create();
         for (let v of this.m_VertexList) {
+            /*vec3.subtract(coords, v.m_Coords, centre);
+
+            const x = coords[0];
+            const y = coords[1];
+            const z = coords[2];
+
+            let rho = Math.sqrt(x * x + y * y + z * z);
+            let theta = Math.acos(y / rho);
+            let phi = Math.acos(-z / Math.sqrt(x * x + y * y));
+            if (x < 0) {
+                phi = Math.PI * 2 - phi;
+            }*/
+            /// essai non fonctionnel
+
             //vec3.add(coords, v.m_Coords, centre);
             /// faire un calcul correct (en fait, c'est un mapping plan)
             let s;
@@ -57,7 +71,7 @@ class Rock extends Mesh {
 
 
             // définition des coordonnées de texture
-            v.setTexCoords(s, t);
+            v.setTexCoords(theta, phi);
         }
     }
 
